@@ -4,7 +4,7 @@ on:
   push:
 
 env:
-  P7ZIP_V: '25.01'
+  P7ZIP_V: '26.00'
   COSMOCC_V: '4.0.2'
 
 jobs:

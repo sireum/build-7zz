@@ -22,22 +22,11 @@ cd 7zip
 git checkout "$P7ZIP_V" 2>/dev/null || true
 git checkout -- .
 
-# Same patches as cosmocc build
-git grep -lz "GetLastError" | xargs -0 sed -i'' -e 's/GetLastError/Get7zLastError/g'
-git grep -lz "SetLastError" | xargs -0 sed -i'' -e 's/SetLastError/Set7zLastError/g'
-git grep -lz "\-Werror" | xargs -0 sed -i'' -e 's/-Werror//g'
+# Apply patches (git apply fails loudly if hunks don't match)
+git apply "$SCRIPT_DIR/patches/01-rename-last-error-remove-werror.patch"
+git apply "$SCRIPT_DIR/patches/03-wasi-system-cpp.patch"
 
-# WASI patches:
-# 1. System.cpp: skip <sys/sysinfo.h> and <sys/sysctl.h> (neither available),
-#    use sysconf(_SC_PHYS_PAGES) fallback for RAM size detection
-sed -i'' -e 's/#if defined(__APPLE__) || defined(__DragonFly__)/#if defined(__wasi__)\
-\/\/ WASI: no sysinfo or sysctl\
-#elif defined(__APPLE__) || defined(__DragonFly__)/' \
-  CPP/Windows/System.cpp
-sed -i'' -e 's/#elif 0 || defined(__sun)/#elif 0 || defined(__sun) || defined(__wasi__)/' \
-  CPP/Windows/System.cpp
-
-# 2. Copy WASI compat header into source tree
+# Copy WASI compat header into source tree
 cp "$SCRIPT_DIR/wasi_compat.h" CPP/Common/
 
 cd "$SCRIPT_DIR"

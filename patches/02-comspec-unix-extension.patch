@@ -1,0 +1,13 @@
+diff --git a/CPP/Windows/FileDir.cpp b/CPP/Windows/FileDir.cpp
+index ad0d8c9..cfd1033 100644
+--- a/CPP/Windows/FileDir.cpp
++++ b/CPP/Windows/FileDir.cpp
+@@ -1298,7 +1298,7 @@ bool SetFileAttrib_PosixHighDetect(CFSTR path, DWORD attrib)
+     }
+   }
+   
+-  if (attrib & FILE_ATTRIBUTE_UNIX_EXTENSION)
++  if ((getenv("COMSPEC") == NULL) && (attrib & FILE_ATTRIBUTE_UNIX_EXTENSION))
+   {
+     TRACE_SetFileAttrib("attrib & FILE_ATTRIBUTE_UNIX_EXTENSION")
+     st.st_mode = attrib >> 16;

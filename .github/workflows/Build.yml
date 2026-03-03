@@ -8,7 +8,7 @@ env:
   COSMOCC_V: '4.0.2'
 
 jobs:
-  ubuntu:
+  cosmo:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,12 +25,42 @@ jobs:
           asset_name: 7zz-${{ env.P7ZIP_V }}-cosmo-${{ env.COSMOCC_V }}.com
           tag: misc
           overwrite: true
-      - name: Upload
+      - name: Upload License
         uses: svenstaro/upload-release-action@v2
         with:
           repo_name: sireum/rolling
           repo_token: ${{ secrets.RELEASE_TOKEN }}
           file: 7zip/DOC/License.txt
           asset_name: 7zz-${{ env.P7ZIP_V }}-cosmo-${{ env.COSMOCC_V }}-license.txt
+          tag: misc
+          overwrite: true
+
+  wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install wasi-sdk
+        run: |
+          WASI_SDK_URL=$(curl -s https://api.github.com/repos/WebAssembly/wasi-sdk/releases/latest \
+            | grep -o '"browser_download_url": *"[^"]*x86_64-linux.tar.gz"' \
+            | head -1 | cut -d'"' -f4)
+          curl -LO "$WASI_SDK_URL"
+          tar xzf wasi-sdk-*-x86_64-linux.tar.gz
+          mv wasi-sdk-*-x86_64-linux ~/wasi-sdk
+      - name: Install binaryen
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q binaryen
+      - name: Build WASM
+        run: |
+          bash build-wasm.sh
+      - name: Upload WASM
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_name: sireum/rolling
+          repo_token: ${{ secrets.RELEASE_TOKEN }}
+          file: 7zz_graal.wasm
+          asset_name: 7zz-${{ env.P7ZIP_V }}.wasm
           tag: misc
           overwrite: true

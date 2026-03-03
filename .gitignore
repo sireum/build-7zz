@@ -1,2 +1,5 @@
 cosmo*
 7z*
+.bsp
+.scala-build
+*.wasm
